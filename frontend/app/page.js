@@ -21,7 +21,7 @@ export default function Home() {
             Dashboard <span className="text-blue-600">Overview</span>
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Welcome back! Here's your daily performance summary.
+            Welcome back! Here&apos;s your daily performance summary.
           </p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm">
@@ -175,8 +175,8 @@ export default function Home() {
 function StatsCard({ icon, label, value, active = false }) {
   return (
     <div className={`p-4 rounded-xl flex items-center justify-between border transition-all ${active
-        ? "bg-white border-red-100 ring-2 ring-red-50 shadow-lg shadow-red-50"
-        : "bg-white border-gray-100 shadow-sm"
+      ? "bg-white border-red-100 ring-2 ring-red-50 shadow-lg shadow-red-50"
+      : "bg-white border-gray-100 shadow-sm"
       }`}>
       <div>
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 ${active ? "bg-red-50" : "bg-gray-50"}`}>
