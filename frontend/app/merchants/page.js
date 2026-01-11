@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
     Plus,
     Search,
@@ -11,6 +12,23 @@ import {
 } from "lucide-react";
 
 export default function Merchants() {
+    const [tenures, setTenures] = useState([{ tenure: "", percentage: "" }]);
+
+    const addTenure = () => {
+        setTenures([...tenures, { tenure: "", percentage: "" }]);
+    };
+
+    const removeTenure = (index) => {
+        const newTenures = tenures.filter((_, i) => i !== index);
+        setTenures(newTenures);
+    };
+
+    const handleTenureChange = (index, field, value) => {
+        const newTenures = [...tenures];
+        newTenures[index][field] = value;
+        setTenures(newTenures);
+    };
+
     return (
         <div className="p-8 bg-gray-50 min-h-screen text-gray-800 font-sans">
             {/* Header */}
@@ -52,27 +70,63 @@ export default function Merchants() {
                     </div>
 
                     <FormSection title="SMART EMI DETAILS" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <select className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all text-gray-600 bg-white">
-                                <option value="" disabled selected>Select Tenure</option>
-                                <option value="3">3 Months</option>
-                                <option value="6">6 Months</option>
-                                <option value="9">9 Months</option>
-                                <option value="12">12 Months</option>
-                                <option value="18">18 Months</option>
-                                <option value="24">24 Months</option>
-                                <option value="36">36 Months</option>
-                            </select>
-                        </div>
-                        <div className="relative">
-                            <input
-                                type="number"
-                                placeholder="Commission Percentage"
-                                className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
-                            />
-                            <span className="absolute right-4 top-3 text-gray-400 text-sm">%</span>
-                        </div>
+                    <div className="space-y-4 mb-6">
+                        {tenures.map((item, index) => (
+                            <div key={index} className="flex items-start gap-4">
+                                <div className="flex-1">
+                                    <select
+                                        value={item.tenure}
+                                        onChange={(e) => handleTenureChange(index, 'tenure', e.target.value)}
+                                        className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all text-gray-600 bg-white"
+                                    >
+                                        <option value="" disabled>Select Tenure</option>
+                                        {[
+                                            { value: "3", label: "3 Months" },
+                                            { value: "6", label: "6 Months" },
+                                            { value: "9", label: "9 Months" },
+                                            { value: "12", label: "12 Months" },
+                                            { value: "18", label: "18 Months" },
+                                            { value: "24", label: "24 Months" },
+                                            { value: "36", label: "36 Months" },
+                                        ].map((option) => (
+                                            <option
+                                                key={option.value}
+                                                value={option.value}
+                                                disabled={tenures.some((t, i) => i !== index && t.tenure === option.value)}
+                                            >
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex-1 relative">
+                                    <input
+                                        type="number"
+                                        value={item.percentage}
+                                        onChange={(e) => handleTenureChange(index, 'percentage', e.target.value)}
+                                        placeholder="Commission Percentage"
+                                        className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                                    />
+                                    <span className="absolute right-4 top-3 text-gray-400 text-sm">%</span>
+                                </div>
+                                {tenures.length > 1 && (
+                                    <button
+                                        onClick={() => removeTenure(index)}
+                                        className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="Remove Tenure"
+                                    >
+                                        <Trash2 className="w-5 h-5" />
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        <button
+                            onClick={addTenure}
+                            className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors mt-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add Another Tenure
+                        </button>
                     </div>
 
                     <FormSection title="PAYMENT METHOD" />
