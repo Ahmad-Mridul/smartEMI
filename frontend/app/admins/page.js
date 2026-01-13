@@ -1,3 +1,4 @@
+"use client";
 import {
     Plus,
     Search,
@@ -7,8 +8,125 @@ import {
     UserPlus,
     Shield
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function Admins() {
+    const [name, setName] = useState('');
+    const [nameError, setNameError] = useState('');
+    const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [mobile, setMobile] = useState('');
+    const [mobileError, setMobileError] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [address, setAddress] = useState('');
+    const [addressError, setAddressError] = useState('');
+    const isFormValid =
+        name.trim() &&
+        email.trim() &&
+        mobile.trim() &&
+        password.trim() &&
+        address.trim() &&
+        !nameError &&
+        !emailError &&
+        !mobileError &&
+        !passwordError &&
+        !addressError;
+    const validate = () => {
+        let valid = true;
+
+        // Name
+        if (!name.trim()) {
+            setNameError("Admin name is required");
+            valid = false;
+        } else {
+            setNameError("");
+        }
+
+        // Email
+        if (!email.trim()) {
+            setEmailError("Email is required");
+            valid = false;
+        } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+            setEmailError("Invalid email format");
+            valid = false;
+        } else {
+            setEmailError("");
+        }
+
+        // Mobile
+        if (!mobile.trim()) {
+            setMobileError("Mobile number is required");
+            valid = false;
+        } else if (!/^[0-9]{10,15}$/.test(mobile)) {
+            setMobileError("Invalid mobile number");
+            valid = false;
+        } else {
+            setMobileError("");
+        }
+
+        // Password
+        if (!password) {
+            setPasswordError("Password is required");
+            valid = false;
+        } else if (password.length < 6) {
+            setPasswordError("Password must be at least 6 characters");
+            valid = false;
+        } else {
+            setPasswordError("");
+        }
+
+        // Address
+        if (!address.trim()) {
+            setAddressError("Address is required");
+            valid = false;
+        } else {
+            setAddressError("");
+        }
+
+        return valid;
+    };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validate()) return;
+        const admin = {
+            name,
+            email,
+            mobile,
+            password,
+            address
+        }
+        const res = await fetch("http://localhost:5000/admins", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(admin)
+        });
+        if (res.ok) {
+            Swal.fire({
+                title: "Admin Added Successfully!",
+                // text: "You clicked the button!",
+                icon: "success"
+            });
+            setName('');
+            setEmail('');
+            setMobile('');
+            setPassword('');
+            setAddress('');
+        }
+
+    }
+    const [admins, setAdmins] = useState([]);
+    useEffect(() => {
+        const fetchAdmins = async () => {
+            const res = await fetch("http://localhost:5000/admins");
+            const data = await res.json();
+            setAdmins(data);
+        }
+        fetchAdmins();
+    }, [admins])
     return (
         <div className="p-8 bg-gray-50 min-h-screen text-gray-800 font-sans">
             {/* Header */}
@@ -31,32 +149,81 @@ export default function Admins() {
                     </div>
                     <p className="text-xs text-gray-500 mb-6">Fill out the details below to create a new system administrator.</p>
 
-                    <div className="space-y-6">
+                    <form className="space-y-6" method="POST">
                         <div>
                             <h3 className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">IDENTITY & SECURITY</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <input
-                                    type="text"
-                                    placeholder="Admin Name"
-                                    className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Email Address"
-                                    className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Mobile Number"
-                                    className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
-                                />
+                                <div>
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => {
+                                            setName(e.target.value);
+                                            if (e.target.value.trim()) setNameError("");
+                                        }}
+                                        onBlur={() => {
+                                            if (!name.trim()) setNameError("Admin name is required");
+                                        }}
+                                        placeholder="Admin Name"
+                                        className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                                    />
+                                    {
+                                        nameError && <p className="text-red-500 text-xs mt-1">{nameError}</p>
+                                    }
+                                </div>
+                                <div>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => {
+                                            setEmail(e.target.value);
+                                            if (e.target.value.trim()) setEmailError("");
+                                        }}
+                                        onBlur={() => {
+                                            if (!email.trim()) setEmailError("Email is required");
+                                        }}
+                                        placeholder="Email Address"
+                                        className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                                    />
+                                    {
+                                        emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>
+                                    }
+                                </div>
+                                <div>
+                                    <input
+                                        type="text"
+                                        value={mobile}
+                                        onChange={(e) => {
+                                            setMobile(e.target.value);
+                                            if (e.target.value.trim()) setMobileError("");
+                                        }}
+                                        onBlur={() => {
+                                            if (!mobile.trim()) setMobileError("Mobile number is required");
+                                        }}
+                                        placeholder="Mobile Number"
+                                        className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                                    />
+                                    {
+                                        mobileError && <p className="text-red-500 text-xs mt-1">{mobileError}</p>
+                                    }
+                                </div>
                                 <div>
                                     <input
                                         type="password"
+                                        value={password}
+                                        onChange={(e) => {
+                                            setPassword(e.target.value);
+                                            if (e.target.value.trim()) setPasswordError("");
+                                        }}
+                                        onBlur={() => {
+                                            if (!password.trim()) setPasswordError("Password is required");
+                                        }}
                                         placeholder="Password"
                                         className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
                                     />
-                                    <p className="text-[10px] text-gray-400 mt-1 ml-1">Leave blank if not changing</p>
+                                    {
+                                        passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -66,19 +233,40 @@ export default function Admins() {
                             <div className="w-full">
                                 <input
                                     type="text"
+                                    value={address}
+                                    onChange={(e) => {
+                                        setAddress(e.target.value);
+                                        if (e.target.value.trim()) setAddressError("");
+                                    }}
+                                    onBlur={() => {
+                                        if (!address.trim()) setAddressError("Address is required");
+                                    }}
                                     placeholder="Physical Address"
                                     className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all placeholder:text-gray-400"
                                 />
+                                {
+                                    addressError && <p className="text-red-500 text-xs mt-1">{addressError}</p>
+                                }
                             </div>
                         </div>
-                    </div>
+                        <div className="p-4 flex justify-end">
+                            <button
+                                type="submit"
+                                disabled={!isFormValid}
+                                onClick={handleSubmit}
+                                className={`px-6 py-2.5 rounded-lg flex items-center gap-2 font-bold text-xs uppercase tracking-wide
+                                    ${isFormValid
+                                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                    }`}
+                            >
+                                Create admin
+                            </button>
+                        </div>
+                    </form>
+
                 </div>
-                <div className="p-4 bg-gray-50 flex justify-end">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 font-bold text-xs shadow-sm transition-colors uppercase tracking-wide">
-                        <Plus className="w-4 h-4" />
-                        Create Admin
-                    </button>
-                </div>
+
             </div>
 
             {/* Section 2: Existing Admins */}
@@ -109,14 +297,7 @@ export default function Admins() {
                             </tr>
                         </thead>
                         <tbody>
-                            {[
-                                { id: 2, name: "Admin", email: "admin@gmail.com", mobile: "01312345678", address: "Chattogram", role: "admin" },
-                                { id: 5, name: "Bedesh Bose", email: "bedesh@bose.com", mobile: "01617776079", address: "Kawran Bazar, Dhaka", role: "admin" },
-                                { id: 8, name: "Test Admin", email: "test.admin@gmail.com", mobile: "01718564155", address: "Kawran Bazar", role: "admin" },
-                                { id: 9, name: "Abdul Khalek Rony", email: "rony@gmail.com", mobile: "01718564155", address: "Kawran Bazar", role: "admin" },
-                                { id: 11, name: "Abdul Khalek Rony", email: "rony2@gmail.com", mobile: "0123456789", address: "Kawran Bazar", role: "admin" },
-                                { id: 1, name: "LA Mridul", email: "mridul@gmail.com", mobile: "01232222222", address: "Khilkhet", role: "super_admin" },
-                            ].map((admin, index) => (
+                            {admins.map((admin, index) => (
                                 <tr key={index} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                                     <td className="p-4 py-3 text-xs text-gray-600 font-medium">{admin.id}</td>
                                     <td className="p-4 py-3 text-xs text-gray-800 font-bold">{admin.name}</td>
@@ -124,18 +305,15 @@ export default function Admins() {
                                     <td className="p-4 py-3 text-xs text-gray-600 font-mono">{admin.mobile}</td>
                                     <td className="p-4 py-3 text-xs text-gray-600">{admin.address}</td>
                                     <td className="p-4 py-3">
-                                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${admin.role === 'super_admin'
+                                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${admin.user?.role === 'super_admin'
                                             ? 'bg-blue-100 text-blue-700'
                                             : 'bg-blue-50 text-blue-600'
                                             }`}>
-                                            {admin.role}
+                                            {admin.user?.role}
                                         </span>
                                     </td>
                                     <td className="p-4 py-3">
                                         <div className="flex items-center justify-center gap-2">
-                                            <button className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                                                <Settings className="w-3.5 h-3.5" />
-                                            </button>
                                             <button className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors">
                                                 <Pencil className="w-3.5 h-3.5" />
                                             </button>

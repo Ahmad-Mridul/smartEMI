@@ -13,61 +13,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
+model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
+  role      String
   createdAt DateTime @default(now())
+
+  admin      Admin?
+  merchant   Merchant?
+  superAdmin SuperAdmin?
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  mobile    String   @unique
+  password  String
+  address   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [email], references: [email])
 }
 
 model Merchant {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
+  mobile    String   @unique
   password  String
-  claimedInvoices ClaimedInvoice[]
-  rewardCodes RewardCode[]
-  payoutRequests PayoutRequest[]
+  address   String
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [email], references: [email])
 }
 
-model Customer {
+model SuperAdmin {
   id        Int      @id @default(autoincrement())
   name      String
-  phone     String   @unique
-  rewards   RewardCode[]
+  email     String   @unique
+  mobile    String   @unique
+  password  String
+  address   String
   createdAt DateTime @default(now())
-}
-
-model RewardCode {
-  id           Int      @id @default(autoincrement())
-  code         String   @unique
-  rewardAmount Float
-  expireDate   DateTime
-  status       String   @default("active") // active | claimed | expired
-  merchant     Merchant @relation(fields: [merchantId], references: [id])
-  merchantId   Int
-  customer     Customer @relation(fields: [customerId], references: [id])
-  customerId   Int
-  claimedInvoices ClaimedInvoice[]
-  createdAt    DateTime @default(now())
-}
-
-model ClaimedInvoice {
-  id           Int      @id @default(autoincrement())
-  rewardCode   RewardCode @relation(fields: [rewardCodeId], references: [id])
-  rewardCodeId Int
-  merchant     Merchant @relation(fields: [merchantId], references: [id])
-  merchantId   Int
-  claimedAt    DateTime @default(now())
-  payoutRequested Boolean @default(false)
-}
-
-model PayoutRequest {
-  id           Int      @id @default(autoincrement())
-  merchant     Merchant @relation(fields: [merchantId], references: [id])
-  merchantId   Int
-  amount       Float
-  status       String   @default("pending") // pending | paid | rejected
-  createdAt    DateTime @default(now())
+  user      User     @relation(fields: [email], references: [email])
 }
